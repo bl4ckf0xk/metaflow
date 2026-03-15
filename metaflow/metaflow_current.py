@@ -24,6 +24,8 @@ class Current(object):
         self._username = None
         self._metadata_str = None
         self._is_running = False
+        self._tags = None
+        self._sys_tags = None
         self._tempdir = TEMPDIR
 
         def _raise(ex):
@@ -46,6 +48,7 @@ class Current(object):
         metadata_str=None,
         is_running=True,
         tags=None,
+        sys_tags=None,
     ):
         if flow is not None:
             self._flow_name = flow.name
@@ -61,6 +64,7 @@ class Current(object):
         self._metadata_str = metadata_str
         self._is_running = is_running
         self._tags = tags
+        self._sys_tags = sys_tags
 
     def _update_env(self, env):
         for k, v in env.items():
@@ -263,13 +267,55 @@ class Current(object):
         return self._username
 
     @property
-    def tags(self):
+    def tags(self) -> Optional[frozenset]:
         """
-        [Legacy function - do not use]
+        The tags of the currently executing run.
 
-        Access tags through the Run object instead.
+        The returned frozenset includes both user-defined and system tags.
+        Outside a running flow, this returns None.
+
+        Returns
+        -------
+        frozenset, optional
+            Tags of the current run.
         """
+        if self._tags is not None or self._sys_tags is not None:
+            user_tags = self._tags or set()
+            sys_tags = self._sys_tags or set()
+            return frozenset(user_tags | sys_tags)
+        return None
+
+    @property
+    def user_tags(self) -> Optional[frozenset]:
+        """
+        The user-defined tags of the currently executing run.
+
+        Outside a running flow, this returns None.
+
+        Returns
+        -------
+        frozenset, optional
+            User-defined tags of the current run.
+        """
+        if self._tags is not None:
+            return frozenset(self._tags)
         return self._tags
+
+    @property
+    def system_tags(self) -> Optional[frozenset]:
+        """
+        The system-defined tags of the currently executing run.
+
+        Outside a running flow, this returns None.
+
+        Returns
+        -------
+        frozenset, optional
+            System tags of the current run.
+        """
+        if self._sys_tags is not None:
+            return frozenset(self._sys_tags)
+        return self._sys_tags
 
     @property
     def tempdir(self) -> Optional[str]:

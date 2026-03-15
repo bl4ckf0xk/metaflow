@@ -37,7 +37,7 @@ class CurrentSingletonTest(MetaflowTest):
         self.usernames = {current.username}
         self.uuid = str(uuid4())
         self.task_data = {current.pathspec: self.uuid}
-        self.tags = current.tags
+        self.tags = set(current.tags)
         self.task_obj = current.task
         self.run_obj = current.run
 
